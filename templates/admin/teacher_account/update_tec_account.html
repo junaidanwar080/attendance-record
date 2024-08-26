@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student Account</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <style>
+        /* Your existing styles */
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h2 {
+            background-color: #59bd8e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #59bd8e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #4ca977;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="container">
+        <h2>Edit Student Account</h2>   
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="teacher_id">Teacher ID: <span style="color:red;">*</span></label>
+                <input type="text" class="form-control" id="teacher_id" value="{{ student.teacher_id }}" name="teacher_id" readonly>
+                {% if error_messages.teacher_id %}
+                    <div class="text-danger">{{ error_messages.teacher_id }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="first_name">First Name: <span style="color:red; font-weight:bold;">*</span></label>
+                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form_data.first_name|default:student.first_name }}" placeholder="Enter first name" >
+                {% if error_messages.first_name %}
+                    <div class="text-danger">{{ error_messages.first_name }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name: <span style="color:red; font-weight:bold;">*</span></label>
+                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ form_data.last_name|default:student.last_name }}" placeholder="Enter last name" >
+                {% if error_messages.last_name %}
+                    <div class="text-danger">{{ error_messages.last_name }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="email">Email: <span style="color:red; font-weight:bold;">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email|default:student.email }}" placeholder="Enter email" >
+                {% if error_messages.email %}
+                    <div class="text-danger">{{ error_messages.email }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="password">Password: <span style="color:red; font-weight:bold;">*</span></label>
+                
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" name="password" value="{{ form_data.password|default:student.password }}" placeholder="Enter password" >
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            <i class="fa fa-eye" id="togglePassword"></i>
+                        </span>
+                    </div>
+                </div>
+                {% if error_messages.password %}
+                    <div class="text-danger">{{ error_messages.password }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="department">Department: <span style="color:red; font-weight:bold;">*</span></label>
+                <select id="department" name="department" class="form-control" >
+                    <option value="">Select Department</option>
+                    {% for department in departments %}
+                    <option value="{{ department.id }}" {% if department.id == form_data.department|default:student.department_id %}selected{% endif %}>
+                        {{ department.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if error_messages.department %}
+                    <div class="text-danger">{{ error_messages.department }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="designation">designation: <span style="color:red; font-weight:bold;">*</span></label>
+                <select id="designation" name="designation" class="form-control" >
+                    <option value="">Select designation</option>
+                    {% for designation in designations %}
+                    <option value="{{ designation.id }}" {% if designation.id == form_data.designation|default:student.designation_id %}selected{% endif %}>
+                        {{ designation.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if error_messages.designation %}
+                    <div class="text-danger">{{ error_messages.designation }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="courses">Courses: <span style="color:red; font-weight:bold;">*</span></label>
+                <select id="courses" name="courses" class="form-control" multiple >
+                    {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id in selected_courses %}selected{% endif %}>
+                            {{ course.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if error_messages.courses %}
+                    <div class="text-danger">{{ error_messages.courses }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Event listener for department dropdown
+            $('#department').on('change', function() {
+                var departmentId = $(this).val();
+
+                // Make an AJAX request to get courses for the selected department
+                $.ajax({
+                    url: "{% url 'get_courses' %}",
+                    data: { department_id: departmentId },
+                    success: function(response) {
+                        var coursesSelect = $('#courses');
+                        coursesSelect.empty(); // Clear existing options
+
+                        $.each(response.courses, function(index, course) {
+                            coursesSelect.append(
+                                $('<option>', {
+                                    value: course.id,
+                                    text: course.name
+                                })
+                            );
+                        });
+                    }
+                });
+            });
+            $('#togglePassword').click(function () {
+            $(this).toggleClass('fa-eye fa-eye-slash');
+            var input = $('#password');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+            } else {
+                input.attr('type', 'password');
+            }
+        });
+        });
+    </script>
+</body>
+</html>

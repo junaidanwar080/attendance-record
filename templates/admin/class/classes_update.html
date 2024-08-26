@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Class</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h2 {
+            background-color: #59bd8e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #59bd8e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        .btn-primary:hover {
+            background-color: #4ca977;
+        }
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <h2 class="text-light py-3">Edit Class</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="container-fluid">
+                <div class="row mb-3">
+                    <input type="hidden" name="class_id" value="{{ classes.id }}">
+
+                    <div class="col-md-6">
+                        <label for="classes_id" class="form-label">Class ID</label>
+                        <input type="text" class="form-control" id="classes_id" value="{{ classes.classes_id }}" name="classes_id" readonly>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Name <span style="color:red;">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ form_data.name|default:classes.name }}">
+                        {% if error_messages.name %}
+                            <div class="text-danger">{{ error_messages.name }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="course" class="form-label">Course <span style="color:red; font-weight:bold;">*</span></label>
+                    <select id="course" name="course" class="form-control">
+                        <option value="" disabled>Select a course</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id == classes.courses.id %}selected{% endif %}>{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if error_messages.course %}
+                        <div class="text-danger">{{ error_messages.course }}</div>
+                    {% endif %}
+                </div>
+                
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Course</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h2 {
+            background-color: #59bd8e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #59bd8e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #4ca977;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="container">
+        <h2 class="text-center">Add Course</h2>   
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="container-fluid">
+                <div class="row">     
+                    <div class="col-md-6">
+                        <label for="course_id" class="form-label">Course ID: <span style="color:red;">*</span></label>
+                        <input type="text" class="form-control" id="course_id" value="{{ course_id }}" name="course_id" value="{{ form_data.course_id|default_if_none:'' }}" readonly>
+                        {% if errors.course_id %}
+                            <div class="text-danger">{{ errors.course_id }}</div>
+                        {% endif %}
+                    </div>           
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Name: <span style="color:red;">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ form_data.name|default_if_none:'' }}" >
+                        {% if error_messages.name %}
+                            <div class="text-danger">{{ error_messages.name }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <label for="department">Department: <span style="color:red; font-weight:bold;">*</span></label>
+                        <select id="department" name="department" class="form-control" required>
+                            <option value="">Select Department</option>
+                            {% for department in departments %}
+                            <option value="{{ department.dep_id }}" {% if department.dep_id == form_data.department %}selected{% endif %}>
+                                {{ department.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if error_messages.department %}
+                            <div class="text-danger">{{ error_messages.department }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

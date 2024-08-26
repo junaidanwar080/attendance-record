@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of classes</title>
+   
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h2 {
+            background-color: #59bd8e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #59bd8e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #4ca977;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h2 class="text-center">classes List</h2>
+        <div class="text-right mb-3">
+            <a class="btn btn-primary" href="{% url 'classes_add' %}">Add class</a>
+        </div>
+        <table class="table table-bordered" id="classesList">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Course</th>                 
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in classes %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ i.name }}</td>                  
+                    <td>{{ i.courses.name }}</td>                   
+                    <td class="action-buttons">
+                       <a class="btn btn-primary btn-sm" href="{% url 'classes_update' i.pk %}">Edit</a>                       
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+ 
+    
+    <script>
+        $(document).ready(function () {
+            $('#classesList').DataTable({
+                paging: true,
+                ordering: true,
+                searching: true,
+                info: true,
+                responsive: true,
+            });
+
+            // Attach click event to all delete buttons
+            $('.delete-btn').on('click', function (e) {
+                e.preventDefault(); // Prevent the default link behavior
+
+                var url = $(this).data('url'); // Get the URL from the data-url attribute
+
+                $('#confirmDeleteBtn').attr('href', url); // Set the href of the confirm button
+                $('#deleteModal').modal('show'); // Show the modal
+            });
+        });
+    </script>
+</body>
+</html>

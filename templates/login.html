@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+	{% include 'before_login/home_navbar.html' %}
+    <div style="margin-top: 75px; ">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+					{{name}}
+                       
+                    <div class="card">
+                        <div class="card-header" style="background: #59bd8e;   "><h4>Login</h4></div>
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label for="email" class="col-md-4 col-form-label text-md-right">User Name</label>
+                                    <div class="col-md-6">
+                                        <input id="username" type="text" class="form-control " name="username"  required autocomplete="email" autofocus>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
+                                    <div class="col-md-6">
+                                        <input id="password" type="password" class="form-control   " name="password" required autocomplete="current-password">
+                                    </div>
+                                </div>
+                               
+                                <div class="form-group row mb-0">
+                                    <div class="col-md-8 offset-md-4">
+                                        {{message}}
+                                        <button type="submit" class="btn btn-primary">
+                                          Login
+                                      </button>
+                                      <!-- <a href="registration.php" class="btn btn-primary"> Signup </a> -->
+                                      </div>
+                                  </div>
+                              </form>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+      </div>
+
+
+
+  </body>
+  </html>

@@ -1,0 +1,44 @@
+<html lang="en">
+
+<head>
+  <title>Dashboard</title>
+</head>
+
+<body>
+  {% include 'std_navbar.html' %}
+
+  <div class="container-fluid">
+    <h1 class="text-center py-3">Wecome to {{user}}</h1>
+   
+    {% block content %}
+    <h1>Welcome, {{ student.username }} {{ student.last_name }}</h1>
+    
+    <h2>Department:</h2>
+    <p>{{ department.name }}</p>
+    
+    <h2>Courses Enrolled:</h2>
+    <ul>
+        {% for course in courses %}
+            <li>{{ course.name }}</li>
+        {% empty %}
+            <li>No courses enrolled.</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Classes:</h2>
+    <ul>
+        {% for class in classes %}
+            <li>{{ class.name }}</li>
+        {% empty %}
+            <li>No classes available.</li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+    
+   
+
+    </div>
+    
+</body>
+
+</html>
