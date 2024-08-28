@@ -54,7 +54,7 @@ def student_dashboard(request):
         else:
             context = {'message': 'No student profile found.'}
         
-        return render(request, 'student_dashboard.html', context)
+        return render(request, 'student/student_dashboard.html', context)
     else:
         return redirect('login')
 
@@ -154,15 +154,15 @@ def edit_student(request, student_id):
 
     if request.method == "POST":
         error_messages = {}
-        first_name = request.POST.get('first_name')
+        username = request.POST.get('username')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
         department_id = request.POST.get('department')
         selected_courses = request.POST.getlist('courses')
 
-        if not first_name:
-            error_messages['first_name'] = "First Name is required."
+        if not username:
+            error_messages['username'] = "First Name is required."
         if not last_name:
             error_messages['last_name'] = "Last Name is required."
         if not email:
@@ -185,7 +185,7 @@ def edit_student(request, student_id):
                 'selected_courses': selected_courses
             })
 
-        student.first_name = first_name
+        student.username = username
         student.last_name = last_name
         student.email = email
         student.password = password

@@ -67,62 +67,62 @@
         <div class="text-right mb-3">
             <a class="btn btn-primary" href="{% url 'add_student' %}">Add Student Account</a>
         </div>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="coursesList">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Full Name</th>
 
-        <table class="table table-bordered" id="coursesList">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Full Name</th>
-                    
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Course(s)</th>
-                   
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in student %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ i.username }} {{ i.last_name }}</td>
-                    <!-- <td>{{ i.courses.name }}</td> -->
-                    <td>{{ i.email }}</td>
-                    <td>{{ i.department.name }}</td>
-                    
-                    <td>
-                        <ul>
-                            {% for course in i.courses.all %}
-                            <li>{{ course.name }}</li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                    <td class="action-buttons">
-                        <a class="btn btn-primary btn-sm" href="{% url 'edit_student' i.pk %}">Edit</a>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Course(s)</th>
 
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in student %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ i.username }} {{ i.last_name }}</td>
+                        <!-- <td>{{ i.courses.name }}</td> -->
+                        <td>{{ i.email }}</td>
+                        <td>{{ i.department.name }}</td>
 
-    <!-- Modal for delete confirmation -->
+                        <td>
+                            <ul>
+                                {% for course in i.courses.all %}
+                                <li>{{ course.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="action-buttons">
+                            <a class="btn btn-primary btn-sm" href="{% url 'edit_student' i.pk %}">Edit</a>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal for delete confirmation -->
 
 
-    <script>
-        $(document).ready(function () {
-            $('#coursesList').DataTable({
-                paging: true,
-                ordering: true,
-                searching: true,
-                info: true,
-                responsive: true,
+        <script>
+            $(document).ready(function () {
+                $('#coursesList').DataTable({
+                    paging: true,
+                    ordering: true,
+                    searching: true,
+                    info: true,
+                    responsive: true,
+                });
+
+
             });
-
-
-        });
-    </script>
+        </script>
 </body>
 
 </html>

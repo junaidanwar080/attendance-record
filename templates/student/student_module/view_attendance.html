@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>View Attendance Records</title>
-    {% include 'std_navbar.html' %}
+    {% include 'student/std_navbar.html' %}
     <style>
         body {
             background-color: #f8f9fa;
@@ -44,17 +44,9 @@
             border: 1px solid #ddd;
         }
 
-        .form-group button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #59bd8e;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .form-group button:hover {
-            background-color: #47a77c;
+        .form-group input.current-date {
+            border: 2px solid #59bd8e;
+            background-color: #e6ffe6;
         }
 
         .table {
@@ -78,26 +70,22 @@
             text-align: center;
         }
     </style>
+    <!-- Add jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>View Attendance Records</h1>
 
-        <form method="GET" action="{% url 'view_attendance' %}">
-            <div class="form-group">
-                <label for="from_date">From Date:</label>
-                <input type="date" id="from_date" name="from_date" value="{{ from_date }}">
-            </div>
+        <div class="form-group">
+            <label for="from_date">From Date:</label>
+            <input type="date" id="from_date" name="from_date" value="{{ from_date }}">
+        </div>
 
-            <div class="form-group">
-                <label for="to_date">To Date:</label>
-                <input type="date" id="to_date" name="to_date" value="{{ to_date }}">
-            </div>
-
-            <div class="form-group">
-                <button type="submit">Filter</button>
-            </div>
-        </form>
+        <div class="form-group">
+            <label for="to_date">To Date:</label>
+            <input type="date" id="to_date" name="to_date" value="{{ to_date }}">
+        </div>
 
         {% if attendance_records %}
         <table class="table">
@@ -111,7 +99,7 @@
             </thead>
             <tbody>
                 {% for record in attendance_records %}
-                <tr>
+                <tr class="attendance-record" data-date="{{ record.to_date }}" data-course="{{ record.course.name }}" data-class="{{ record.class_room.name }}" data-status="{{ record.status }}">
                     <td>{{ record.to_date|date:'d-m-Y' }}</td>
                     <td>{{ record.course.name }}</td>
                     <td>{{ record.class_room.name }}</td>
@@ -126,24 +114,54 @@
     </div>
 
     <script>
-        const fromDateInput = document.getElementById('from_date');
-        const toDateInput = document.getElementById('to_date');
+        $(document).ready(function() {
+            const fromDateInput = $('#from_date');
+            const toDateInput = $('#to_date');
 
-        fromDateInput.addEventListener('change', function() {
-            toDateInput.min = this.value;
+            function filterRecords() {
+                const fromDate = new Date(fromDateInput.val());
+                const toDate = new Date(toDateInput.val());
+
+                $('.attendance-record').each(function() {
+                    const recordDate = new Date($(this).data('date'));
+
+                    if ((isNaN(fromDate) || recordDate >= fromDate) && (isNaN(toDate) || recordDate <= toDate)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            fromDateInput.on('change', filterRecords);
+            toDateInput.on('change', filterRecords);
+
+            function highlightCurrentDate() {
+                const today = new Date().toISOString().split('T')[0];
+                if (fromDateInput.val() === today) {
+                    fromDateInput.addClass('current-date');
+                } else {
+                    fromDateInput.removeClass('current-date');
+                }
+                if (toDateInput.val() === today) {
+                    toDateInput.addClass('current-date');
+                } else {
+                    toDateInput.removeClass('current-date');
+                }
+            }
+
+            fromDateInput.on('change', highlightCurrentDate);
+            toDateInput.on('change', highlightCurrentDate);
+
+            if (fromDateInput.val()) {
+                toDateInput.attr('min', fromDateInput.val());
+            }
+            if (toDateInput.val()) {
+                fromDateInput.attr('max', toDateInput.val());
+            }
+
+            highlightCurrentDate();
         });
-
-        toDateInput.addEventListener('change', function() {
-            fromDateInput.max = this.value;
-        });
-
-        // Initialize the min/max values on page load
-        if (fromDateInput.value) {
-            toDateInput.min = fromDateInput.value;
-        }
-        if (toDateInput.value) {
-            fromDateInput.max = toDateInput.value;
-        }
     </script>
 </body>
 </html>

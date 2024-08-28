@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List of courses</title>
-   
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -60,66 +60,67 @@
 
 <body>
     {% include 'navbar.html' %}
-    
+
     <div class="container">
         <h2 class="text-center">courses List</h2>
 
         <div class="text-right mb-3">
             <a class="btn btn-primary" href="{% url 'courses_add' %}">Add courses</a>
         </div>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="coursesList">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Created On</th>
+                        <th>Updated On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in design %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ i.name }}</td>
+                        <td>{{ i.department.name }}</td>
+                        <td>{{ i.created_on|date:'d-m-Y' }}</td>
+                        <td>{{ i.updated_on|date:'d-m-Y' }}</td>
+                        <td class="action-buttons">
+                            <a class="btn btn-primary btn-sm" href="{% url 'courses_update' i.pk %}">Edit</a>
 
-        <table class="table table-bordered" id="coursesList">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Created On</th>
-                    <th>Updated On</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in design %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ i.name }}</td>
-                    <td>{{ i.department.name }}</td>
-                    <td>{{ i.created_on|date:'d-m-Y' }}</td>
-                    <td>{{ i.updated_on|date:'d-m-Y' }}</td>
-                    <td class="action-buttons">
-                        <a class="btn btn-primary btn-sm" href="{% url 'courses_update' i.pk %}">Edit</a>
-        
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Modal for delete confirmation -->
-  
-    
-    <script>
-        $(document).ready(function () {
-            $('#coursesList').DataTable({
-                paging: true,
-                ordering: true,
-                searching: true,
-                info: true,
-                responsive: true,
+        <!-- Modal for delete confirmation -->
+
+
+        <script>
+            $(document).ready(function () {
+                $('#coursesList').DataTable({
+                    paging: true,
+                    ordering: true,
+                    searching: true,
+                    info: true,
+                    responsive: true,
+                });
+
+                // Attach click event to all delete buttons
+                $('.delete-btn').on('click', function (e) {
+                    e.preventDefault(); // Prevent the default link behavior
+
+                    var url = $(this).data('url'); // Get the URL from the data-url attribute
+
+                    $('#confirmDeleteBtn').attr('href', url); // Set the href of the confirm button
+                    $('#deleteModal').modal('show'); // Show the modal
+                });
             });
-
-            // Attach click event to all delete buttons
-            $('.delete-btn').on('click', function (e) {
-                e.preventDefault(); // Prevent the default link behavior
-
-                var url = $(this).data('url'); // Get the URL from the data-url attribute
-
-                $('#confirmDeleteBtn').attr('href', url); // Set the href of the confirm button
-                $('#deleteModal').modal('show'); // Show the modal
-            });
-        });
-    </script>
+        </script>
 </body>
+
 </html>
