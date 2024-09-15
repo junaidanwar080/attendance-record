@@ -115,29 +115,37 @@
 
     <script>
         $(document).ready(function() {
-            const fromDateInput = $('#from_date');
-            const toDateInput = $('#to_date');
-
-            function filterRecords() {
-                const fromDate = new Date(fromDateInput.val());
-                const toDate = new Date(toDateInput.val());
-
-                $('.attendance-record').each(function() {
-                    const recordDate = new Date($(this).data('date'));
-
-                    if ((isNaN(fromDate) || recordDate >= fromDate) && (isNaN(toDate) || recordDate <= toDate)) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
+            const table = $('.table').DataTable(); // Initialize DataTables on the table
+    
+            $('#from_date, #to_date').on('change', function () {
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
+    
+                table.rows().every(function () {
+                    const data = this.data();
+                    const recordDate = data[0]; // Assuming 'Date' is in the first column of the table
+    
+                    if (recordDate) {
+                        // Convert date in the format 'd-m-Y' to 'm/d/Y' for comparison
+                        const date = new Date(recordDate.split('-').reverse().join('/'));
+                        const from = fromDate ? new Date(fromDate) : null;
+                        const to = toDate ? new Date(toDate) : null;
+    
+                        // Check if the record falls within the selected range
+                        if ((!from || date >= from) && (!to || date <= to)) {
+                            $(this.node()).show();
+                        } else {
+                            $(this.node()).hide();
+                        }
                     }
                 });
-            }
-
-            fromDateInput.on('change', filterRecords);
-            toDateInput.on('change', filterRecords);
-
+            });
+    
             function highlightCurrentDate() {
                 const today = new Date().toISOString().split('T')[0];
+                const fromDateInput = $('#from_date');
+                const toDateInput = $('#to_date');
+    
                 if (fromDateInput.val() === today) {
                     fromDateInput.addClass('current-date');
                 } else {
@@ -149,19 +157,14 @@
                     toDateInput.removeClass('current-date');
                 }
             }
-
-            fromDateInput.on('change', highlightCurrentDate);
-            toDateInput.on('change', highlightCurrentDate);
-
-            if (fromDateInput.val()) {
-                toDateInput.attr('min', fromDateInput.val());
-            }
-            if (toDateInput.val()) {
-                fromDateInput.attr('max', toDateInput.val());
-            }
-
+    
+            // Call the highlightCurrentDate function on input change
+            $('#from_date, #to_date').on('change', highlightCurrentDate);
+    
+            // Initialize highlighting on page load
             highlightCurrentDate();
         });
     </script>
+    
 </body>
 </html>
