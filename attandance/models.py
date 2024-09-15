@@ -79,7 +79,8 @@ class Attendance(models.Model):
 
     to_date = models.DateField(null=True)
     from_date = models.DateField(null=True)
-    # date = models.DateField(null=True)
+    # date = models.DateField()
+    date = models.DateField(null=True)
     # entry_time = models.DateTimeField(null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)

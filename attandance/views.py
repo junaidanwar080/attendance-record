@@ -54,7 +54,7 @@ def student_dashboard(request):
         else:
             context = {'message': 'No student profile found.'}
         
-        return render(request, 'student_dashboard.html', context)
+        return render(request, 'student/student_dashboard.html', context)
     else:
         return redirect('login')
 
@@ -96,7 +96,7 @@ def add_student(request):
         if error_messages:
             departments = Department.objects.all()
             courses = Courses.objects.all()
-            return render(request, 'student_account/add_std_account.html', {
+            return render(request, 'admin/student_account/add_std_account.html', {
                 'error_messages': error_messages,
                 'form_data': request.POST,
                 'student_id': student_id,
@@ -154,15 +154,15 @@ def edit_student(request, student_id):
 
     if request.method == "POST":
         error_messages = {}
-        first_name = request.POST.get('first_name')
+        username = request.POST.get('username')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
         department_id = request.POST.get('department')
         selected_courses = request.POST.getlist('courses')
 
-        if not first_name:
-            error_messages['first_name'] = "First Name is required."
+        if not username:
+            error_messages['username'] = "First Name is required."
         if not last_name:
             error_messages['last_name'] = "Last Name is required."
         if not email:
@@ -185,7 +185,7 @@ def edit_student(request, student_id):
                 'selected_courses': selected_courses
             })
 
-        student.first_name = first_name
+        student.username = username
         student.last_name = last_name
         student.email = email
         student.password = password
@@ -1035,7 +1035,16 @@ def upload_and_filter_attendance(request):
         'to_date': to_date
     })
 
-@login_required  
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+from django.utils.timezone import now
+from collections import OrderedDict
+
+@login_required
 def view_attendance(request):
     from_date_str = request.GET.get('from_date')
     to_date_str = request.GET.get('to_date')
@@ -1060,17 +1069,19 @@ def view_attendance(request):
     attendance_records = Attendance.objects.filter(student=student)
 
     if from_date:
-        attendance_records = attendance_records.filter(from_date__gte=from_date)
+        attendance_records = attendance_records.filter(date__gte=from_date)
     if to_date:
-        attendance_records = attendance_records.filter(to_date__lte=to_date)
+        attendance_records = attendance_records.filter(date__lte=to_date)
 
-    attendance_records = attendance_records.distinct()
+    # Remove duplicates using an OrderedDict
+    unique_records = list(OrderedDict.fromkeys(attendance_records))
 
     today = now().date()
 
     return render(request, 'student/student_module/view_attendance.html', {
-        'attendance_records': attendance_records,
+        'attendance_records': unique_records,
         'from_date': from_date_str,
         'to_date': to_date_str,
         'today': today
     })
+

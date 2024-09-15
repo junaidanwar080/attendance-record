@@ -113,112 +113,112 @@
                 </div>
             </div>
         </div>
+        <div class="table-responsive">
+            {% if attendance_records %}
+            <table class="table table-striped" id="attendanceList">
+                <thead>
+                    <tr>
+                        <th data-column="0"><i class="fas fa-bars"></i> To Date</th>
+                        <th data-column="1"><i class="fas fa-bars"></i> From Date</th>
+                        <th data-column="2"><i class="fas fa-bars"></i> Student</th>
+                        <th data-column="3"><i class="fas fa-bars"></i> Department</th>
+                        <th data-column="4"><i class="fas fa-bars"></i> Course</th>
+                        <th data-column="5"><i class="fas fa-bars"></i> Class</th>
+                        <th data-column="6"><i class="fas fa-bars"></i> Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ record.to_date|date:'d-m-Y' }}</td>
+                        <td>{{ record.from_date|date:'d-m-Y' }}</td>
+                        <td>{{ record.student.username }} {{ record.student.last_name }}</td>
+                        <td>{{ record.department.name }}</td>
+                        <td>{{ record.course.name }}</td>
+                        <td>{{ record.class_room.name }}</td>
+                        <td>{{ record.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-        {% if attendance_records %}
-        <table class="table table-striped" id="attendanceList">
-            <thead>
-                <tr>
-                    <th data-column="0"><i class="fas fa-bars"></i> To Date</th>
-                    <th data-column="1"><i class="fas fa-bars"></i> From Date</th>
-                    <th data-column="2"><i class="fas fa-bars"></i> Student</th>
-                    <th data-column="3"><i class="fas fa-bars"></i> Department</th>
-                    <th data-column="4"><i class="fas fa-bars"></i> Course</th>
-                    <th data-column="5"><i class="fas fa-bars"></i> Class</th>
-                    <th data-column="6"><i class="fas fa-bars"></i> Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in attendance_records %}
-                <tr>
-                    <td>{{ record.to_date|date:'d-m-Y' }}</td>
-                    <td>{{ record.from_date|date:'d-m-Y' }}</td>
-                    <td>{{ record.student.username }} {{ record.student.last_name }}</td>
-                    <td>{{ record.department.name }}</td>
-                    <td>{{ record.course.name }}</td>
-                    <td>{{ record.class_room.name }}</td>
-                    <td>{{ record.status }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            {% else %}
+            <p>No attendance records uploaded yet.</p>
+            {% endif %}
+        </div>
 
-        {% else %}
-        <p>No attendance records uploaded yet.</p>
-        {% endif %}
-    </div>
+        <script>
+            $(document).ready(function () {
+                var table = $('#attendanceList').DataTable({
+                    ordering: false,  // Disable sorting/ordering
+                    initComplete: function () {
+                        var api = this.api();
 
-    <script>
-        $(document).ready(function () {
-            var table = $('#attendanceList').DataTable({
-                ordering: false,  // Disable sorting/ordering
-                initComplete: function () {
-                    var api = this.api();
+                        // Add custom dropdown filter to headers
+                        api.columns().every(function () {
+                            var column = this;
+                            var header = $(column.header());
 
-                    // Add custom dropdown filter to headers
-                    api.columns().every(function () {
-                        var column = this;
-                        var header = $(column.header());
+                            // Create filter dropdown and append to header
+                            var filter = $('<div class="filter-dropdown"><select class="form-control" multiple><option value="">All</option></select></div>')
+                                .appendTo(header)
+                                .on('change', 'select', function () {
+                                    var colIndex = column.index();
+                                    var selectedValues = $(this).val() || [];
+                                    column.search(selectedValues.join('|'), true, false).draw();
+                                });
 
-                        // Create filter dropdown and append to header
-                        var filter = $('<div class="filter-dropdown"><select class="form-control" multiple><option value="">All</option></select></div>')
-                            .appendTo(header)
-                            .on('change', 'select', function () {
-                                var colIndex = column.index();
-                                var selectedValues = $(this).val() || [];
-                                column.search(selectedValues.join('|'), true, false).draw();
+                            column.data().unique().each(function (d, j) {
+                                if (d) {
+                                    filter.find('select').append('<option value="' + d + '">' + d + '</option>');
+                                }
                             });
 
-                        column.data().unique().each(function (d, j) {
-                            if (d) {
-                                filter.find('select').append('<option value="' + d + '">' + d + '</option>');
-                            }
+                            header.on('click', function () {
+                                var isVisible = filter.is(':visible');
+                                if (!isVisible) {
+                                    filter.show();
+                                }
+                            });
                         });
+                    }
+                });
 
-                        header.on('click', function () {
-                            var isVisible = filter.is(':visible');
-                            if (!isVisible) {
-                                filter.show();
+                // Date filter functionality
+                $('#fromDate, #toDate').on('change', function () {
+                    var fromDate = $('#fromDate').val();
+                    var toDate = $('#toDate').val();
+
+                    table.rows().every(function () {
+                        var data = this.data();
+                        var recordDate = data[0]; // Assuming 'To Date' is in the first column
+
+                        if (recordDate) {
+                            var date = new Date(recordDate.split('-').reverse().join('/'));
+                            var from = new Date(fromDate);
+                            var to = new Date(toDate);
+
+                            if ((!fromDate || date >= from) && (!toDate || date <= to)) {
+                                $(this.node()).show();
+                            } else {
+                                $(this.node()).hide();
                             }
-                        });
-                    });
-                }
-            });
-
-            // Date filter functionality
-            $('#fromDate, #toDate').on('change', function () {
-                var fromDate = $('#fromDate').val();
-                var toDate = $('#toDate').val();
-
-                table.rows().every(function () {
-                    var data = this.data();
-                    var recordDate = data[0]; // Assuming 'To Date' is in the first column
-
-                    if (recordDate) {
-                        var date = new Date(recordDate.split('-').reverse().join('/'));
-                        var from = new Date(fromDate);
-                        var to = new Date(toDate);
-
-                        if ((!fromDate || date >= from) && (!toDate || date <= to)) {
-                            $(this.node()).show();
-                        } else {
-                            $(this.node()).hide();
                         }
+                    });
+                });
+
+
+                // Hide the filter dropdown when clicking outside
+                $(document).mouseup(function (e) {
+                    var container = $('.filter-dropdown');
+                    if (!container.is(e.target) && container.has(e.target).length === 0) {
+                        container.hide();
                     }
                 });
             });
-       
-
-            // Hide the filter dropdown when clicking outside
-            $(document).mouseup(function (e) {
-                var container = $('.filter-dropdown');
-                if (!container.is(e.target) && container.has(e.target).length === 0) {
-                    container.hide();
-                }
-            });
-        });
 
 
-    </script>
+        </script>
 </body>
 
 </html>
