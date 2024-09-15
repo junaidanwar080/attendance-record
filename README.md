@@ -1,7 +1,6 @@
-# Attendance Record Project
+# Attendance Record System 
 
-This project is designed for managing attendance records using Django. Follow the steps below to set up and run the project. Even if you're not tech-savvy, these instructions should help you get started.
-
+This project is designed for managing attendance records using Django. Follow the steps below to set up and run the project.
 ## Prerequisites
 
 Before starting, make sure you have the following installed:
