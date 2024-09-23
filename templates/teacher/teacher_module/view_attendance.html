@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Attendance Records</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        h2 {
+            background-color: #59bd8e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .form-control,
+        .btn-primary {
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #59bd8e;
+            border: none;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #4ca977;
+        }
+
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        th {
+            position: relative;
+            padding-left: 10px;
+            text-align: left;
+        }
+
+        th i {
+            margin-right: 8px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .filter-dropdown label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .filter-dropdown input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'teacher/std_navbar.html' %}
+    <div class="container mt-5">
+        <h2>View Attendance Records</h2>
+
+        <!-- Filter Form -->
+        <form method="get" action="{% url 'view_attendance' %}">
+            <div class="form-row mb-4">
+                <div class="form-group col-md-6">
+                    <label for="from_date">From Date</label>
+                    <input type="date" id="from_date" name="from_date" class="form-control" value="{{ from_date }}">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="to_date">To Date</label>
+                    <input type="date" id="to_date" name="to_date" class="form-control" value="{{ to_date }}">
+                </div>
+               
+                
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+
+        <!-- Attendance Records Table -->
+        <div class="table-responsive mt-5">
+            {% if attendance_records %}
+            <table class="table table-striped table-bordered" id="attendanceList">
+                <thead>
+                    <tr>
+                        <th data-column="0"><i class="fas fa-bars"></i> Date</th>
+                        <th data-column="1"><i class="fas fa-bars"></i> Class</th>
+                        <th data-column="1"><i class="fas fa-bars"></i> Course</th>
+                        <th data-column="2"><i class="fas fa-bars"></i> Student</th>
+                        <th data-column="3"><i class="fas fa-bars"></i> Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ record.to_date|date:'d-m-Y' }}</td>
+                        <td>{{ record.class_room.name }}</td>
+                        <td>{{ record.course.name }}</td>
+                        <td>{{ record.student.username }} {{ record.student.last_name }}</td>
+                        <td>{{ record.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-center">No attendance records found for the selected filters.</p>
+            {% endif %}
+        </div>
+
+        <!-- Scripts -->
+        <script>
+            $(document).ready(function () {
+                var table = $('#attendanceList').DataTable({
+                    ordering: false,  // Disable sorting/ordering
+                    initComplete: function () {
+                        var api = this.api();
+
+                        // Add custom dropdown filter to headers
+                        api.columns().every(function () {
+                            var column = this;
+                            var header = $(column.header());
+
+                            // Create filter dropdown and append to header
+                            var filter = $('<div class="filter-dropdown"><select class="form-control" multiple><option value="">All</option></select></div>')
+                                .appendTo(header)
+                                .on('change', 'select', function () {
+                                    var colIndex = column.index();
+                                    var selectedValues = $(this).val() || [];
+                                    column.search(selectedValues.join('|'), true, false).draw();
+                                });
+
+                            column.data().unique().each(function (d, j) {
+                                if (d) {
+                                    filter.find('select').append('<option value="' + d + '">' + d + '</option>');
+                                }
+                            });
+
+                            header.on('click', function () {
+                                var isVisible = filter.is(':visible');
+                                if (!isVisible) {
+                                    filter.show();
+                                }
+                            });
+                        });
+                    }
+                });
+
+                // Date filter functionality
+                $('#fromDate, #toDate').on('change', function () {
+                    var fromDate = $('#fromDate').val();
+                    var toDate = $('#toDate').val();
+
+                    table.rows().every(function () {
+                        var data = this.data();
+                        var recordDate = data[0]; // Assuming 'To Date' is in the first column
+
+                        if (recordDate) {
+                            var date = new Date(recordDate.split('-').reverse().join('/'));
+                            var from = new Date(fromDate);
+                            var to = new Date(toDate);
+
+                            if ((!fromDate || date >= from) && (!toDate || date <= to)) {
+                                $(this.node()).show();
+                            } else {
+                                $(this.node()).hide();
+                            }
+                        }
+                    });
+                });
+
+
+                // Hide the filter dropdown when clicking outside
+                $(document).mouseup(function (e) {
+                    var container = $('.filter-dropdown');
+                    if (!container.is(e.target) && container.has(e.target).length === 0) {
+                        container.hide();
+                    }
+                });
+            });
+
+
+        </script>
+    </div>
+</body>
+
+</html>

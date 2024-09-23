@@ -1,0 +1,75 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+</head>
+
+<body>
+ 
+  <nav class="navbar navbar-expand-lg navbar-light" style="background: #59bd8e;">
+    <a class="navbar-brand" href="/dashboard">Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          
+          <a class="nav-link" href="{% url 'view_profile' %}">View Profile</a>
+       </a>
+        </li>
+        <li class="nav-item active">
+          
+          <a class="nav-link" href="{% url 'view_courses' %}">Course</a>
+       </a>
+        </li>
+        
+       
+        <li class="nav-item active">
+          <a class="nav-link" href="/view_attendance">Attendance Records
+       </a>
+        </li>
+      </ul>
+      
+      <ul class="navbar-nav ml-auto">
+       
+        {% if user.username is not None %}
+        <li class="nav-item dropdown custom-dropdown">
+          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">{{ user.username|capfirst }}</a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="{% url 'user_logout' %}">Log Out</a>
+          </div>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+</nav>
+
+</body>
+
+</html>
