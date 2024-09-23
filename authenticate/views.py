@@ -12,7 +12,7 @@ def user_login(request):
         if request.user.is_superuser:
             return redirect('/dashboard/')
         else:
-            return redirect('/student_dashboard/')
+            return redirect('/teacher_dashboard/')
 
     message = ''
     if request.method == 'POST':
@@ -26,7 +26,7 @@ def user_login(request):
                 if user.is_superuser:
                     return redirect('/dashboard/')
                 else:
-                    return redirect('/student_dashboard/')
+                    return redirect('/teacher_dashboard/')
             else:
                 message = 'Account temporarily blocked.'
                 messages.error(request, message)

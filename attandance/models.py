@@ -31,7 +31,7 @@ class Courses(models.Model):
         return self.name
 class Classes(models.Model):
     classes_id = models.CharField(max_length=100, null=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     courses = models.ForeignKey(Courses, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -42,7 +42,7 @@ class Classes(models.Model):
 
 class Teacher(models.Model):
     teacher_id = models.CharField(max_length=50)
-    first_name = models.CharField(max_length=50)
+    username = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
@@ -52,7 +52,7 @@ class Teacher(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.username} {self.last_name}"
 
 class Student(models.Model):
     student_id = models.CharField(max_length=50)
@@ -85,13 +85,14 @@ class Attendance(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     class_room = models.ForeignKey(Classes, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
-        return f"{self.department} - {self.course} - {self.class_room} - {self.status}"
+        return f"{self.student} - {self.teacher}"
 
 
 class UploadedFiles(models.Model):
@@ -136,7 +137,8 @@ class CustomUser(AbstractUser):
     date_of_creation = models.DateField(auto_now_add=True, null=True)
     last_login_date = models.DateField(blank=True, null=True)
     is_super_admin = models.BooleanField(default=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) 
+    teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE, null=True, blank=True) 
+    
     objects = CustomUserManager()
 
     def __str__(self):

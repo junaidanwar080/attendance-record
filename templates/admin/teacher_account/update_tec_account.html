@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Student Account</title>
+    <title>Edit Teacher Account</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <style>
@@ -64,7 +64,7 @@
 <body>
     {% include 'navbar.html' %}
     <div class="container">
-        <h2>Edit Student Account</h2>   
+        <h2>Edit Teacher Account</h2>   
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
@@ -75,10 +75,10 @@
                 {% endif %}
             </div>
             <div class="form-group">
-                <label for="first_name">First Name: <span style="color:red; font-weight:bold;">*</span></label>
-                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form_data.first_name|default:student.first_name }}" placeholder="Enter first name" >
-                {% if error_messages.first_name %}
-                    <div class="text-danger">{{ error_messages.first_name }}</div>
+                <label for="username">First Name: <span style="color:red; font-weight:bold;">*</span></label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ form_data.username|default:student.username }}" placeholder="Enter first name" >
+                {% if error_messages.username %}
+                    <div class="text-danger">{{ error_messages.username }}</div>
                 {% endif %}
             </div>
             <div class="form-group">
@@ -96,14 +96,14 @@
                 {% endif %}
             </div>
             <div class="form-group">
-                <label for="password">Password: <span style="color:red; font-weight:bold;">*</span></label>
+                <!-- <label  for="password">Password: <span style="color:red; font-weight:bold;">*</span></label> -->
                 
                 <div class="input-group">
-                    <input type="password" class="form-control" id="password" name="password" value="{{ form_data.password|default:student.password }}" placeholder="Enter password" >
+                    <input hidden type="password" class="form-control" id="password" name="password" value="{{ form_data.password|default:student.password }}" placeholder="Enter password" >
                     <div class="input-group-append">
-                        <span class="input-group-text">
+                        <!-- <span class="input-group-text">
                             <i class="fa fa-eye" id="togglePassword"></i>
-                        </span>
+                        </span> -->
                     </div>
                 </div>
                 {% if error_messages.password %}

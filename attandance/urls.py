@@ -5,7 +5,7 @@ urlpatterns = [
     path('index/', views.index, name='index'),  
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     # path('register_student/', views.register_student, name='register_student'),
     # path('register_list/', views.register_list, name='register_list'),
     # path('update_register/<int:user_id>/', views.update_register, name='update_register'),
@@ -41,6 +41,7 @@ urlpatterns = [
     path('get_courses/', views.get_courses, name='get_courses'),
     path('upload_and_filter_attendance/', views.upload_and_filter_attendance, name='upload_and_filter_attendance'),
     # path('upload-excel/', views.upload_and_parse_excel, name='upload_excel'),
+     path('view_profile/', views.view_profile, name='view_profile'),
     path('view_courses/', views.view_courses, name='view_courses'),
     path('view_attendance/', views.view_attendance, name='view_attendance'), 
 ]  
