@@ -318,8 +318,8 @@ def edit_teacher(request, teacher_id):
         if not email:
             error_messages['email'] = "Email is required."
        
-        if not password:
-            error_messages['password'] = "Password is required."
+        # if not password:
+        #     error_messages['password'] = "Password is required."
         if not department_id:
             error_messages['department'] = "Department is required."
 
