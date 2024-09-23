@@ -86,7 +86,7 @@
                     {% for i in student %}
                     <tr>
                         <th scope="row">{{ forloop.counter }}</th>
-                        <td>{{ i.first_name }} {{ i.last_name }}</td>
+                        <td>{{ i.username }} {{ i.last_name }}</td>
                         <td>{{ i.email }}</td>
                         <td>{{ i.designation.name }}</td>
                         <td>{{ i.department.name }}</td>
