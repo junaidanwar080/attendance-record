@@ -20,7 +20,6 @@ from datetime import datetime
 def index(request):
     send_mail_task.delay() 
     return HttpResponse("<h1>Home,from celery</h1>")
-# celery -A attandance_pro worker -l info -P eventlet 
 
 
 def home(request):
@@ -81,7 +80,6 @@ def add_student(request):
         department_id = request.POST.get('department')
         selected_courses = request.POST.getlist('courses')
         
-        # Validation logic
         if not username:
             error_messages['username'] = "First Name is required."
         if not last_name:
@@ -95,7 +93,6 @@ def add_student(request):
         if not department_id:
             error_messages['department'] = "Department is required."
 
-        # Return errors if validation fails
         if error_messages:
             departments = Department.objects.all()
             courses = Courses.objects.all()
@@ -107,24 +104,21 @@ def add_student(request):
                 'courses': courses
             })
 
-        # Create and save the Student object
         student = Student(
             student_id=student_id,
             username=username,
             last_name=last_name,
             email=email,
-            password=password,  # Should hash the password before saving it
+            password=password, 
             department_id=department_id,
         )
         student.save()
 
-        # Add selected courses to the student
         if selected_courses:
             student.courses.set(selected_courses)
 
         return redirect('student_list')
 
-    # Handle GET request
     last_student = Student.objects.order_by('-created_at').first()
     student_id = 1 if last_student is None else int(last_student.student_id) + 1
 
@@ -256,7 +250,6 @@ def add_teacher(request):
                 'courses': courses
             })
 
-        # Create and save the Teacher object
         teacher = Teacher(
             teacher_id=teacher_id,
             username=username,
@@ -267,13 +260,11 @@ def add_teacher(request):
         )
         teacher.save()
 
-        # Add selected courses to the teacher
         if selected_courses:
             teacher.courses.set(selected_courses)
 
-        # Create CustomUser object
         user = CustomUser(
-            username=username,  # Corrected field usage
+            username=username,  
             email=email,
             full_name=f"{username} {last_name}",
             phone_number='',
@@ -406,7 +397,6 @@ def designation_add(request):
                 'form_data': request.POST
             })
 
-        # Save the designation
         designation_add = Designation(
             des_id=des_id,
             name=name,
@@ -416,7 +406,6 @@ def designation_add(request):
         designation_add.save()
         return redirect('designation_list')
 
-    # Get the next Designation ID
     last_designation = Designation.objects.order_by('-created_at').first()
     des_id = 1 if last_designation is None else int(last_designation.des_id) + 1
     
@@ -612,31 +601,29 @@ def courses_add(request):
                 'error_messages': error_messages,
                 'form_data': request.POST,
                 'course_id': course_id,
-                'departments': departments  # Pass departments here
+                'departments': departments  
             }) 
 
-        # Save the course if no errors
         course_add = Courses(
             course_id=course_id,
             name=name,
-            department_id=department_id,  # Assign department
+            department_id=department_id, 
             created_on=timezone.now().date(),
         )
         course_add.save()
         return redirect('courses_list')
 
-    # For GET request, calculate the next course ID and fetch departments
+    
     last_course = Courses.objects.order_by('-created_on').first()
     if last_course is None:
         course_id = 1
     else:
         course_id = int(last_course.course_id) + 1
 
-    departments = Department.objects.all()  # Fetch departments for dropdown
-
+    departments = Department.objects.all()  
     return render(request, 'admin/courses/courses_add.html', {
         "course_id": course_id,
-        'departments': departments  # Pass departments here
+        'departments': departments  
     })
 
 @login_required(login_url='home')
@@ -661,7 +648,6 @@ def courses_update(request, courses_id):
         if not name:
             error_messages['name'] = "Name is required."
         
-        # Validation for department
         if not department_id:
             error_messages['department'] = "Department is required."
 
@@ -674,7 +660,7 @@ def courses_update(request, courses_id):
                 'departments': departments
             })
 
-        # Update course details
+       
         course.name = name
         course.description = description
         course.department_id = department_id
@@ -730,18 +716,16 @@ def classes_add(request):
         classes_add.save()
         return redirect('classes_list')
 
-    # For GET request, calculate the next classes ID and fetch courses
     last_classes = Classes.objects.order_by('-created_on').first()
     if last_classes is None:
         classes_id = 1
     else:
         classes_id = int(last_classes.classes_id) + 1
 
-    courses = Courses.objects.all()  # Fetch courses for dropdown
-
+    courses = Courses.objects.all() 
     return render(request, 'admin/class/classes_add.html', {
         "classes_id": classes_id,
-        'courses': courses  # Pass courses here
+        'courses': courses  
     })
 
 @login_required(login_url='home')
@@ -829,7 +813,7 @@ def upload_and_filter_attendance(request):
                         'from_date': 'From Date',
                         'username': 'First Name',
                         'last_name': 'Last Name',
-                        'teacher_username': 'Teacher First Name',  # Assuming these fields in the file
+                        'teacher_username': 'Teacher First Name', 
                         'teacher_last_name': 'Teacher Last Name'
                     }, inplace=True)
                     
@@ -839,13 +823,12 @@ def upload_and_filter_attendance(request):
                             'message': 'The file does not contain required columns. Columns found: ' + ', '.join(data.columns)
                         })
 
-                    # Normalize data from the database (lowercase for comparison)
                     departments = {d.name.lower(): d for d in Department.objects.all()}
                     courses = {f"{c.name.lower()}-{c.department.name.lower()}": c for c in Courses.objects.select_related('department').all()}
                     classes = {f"{cl.name.lower()}-{cl.courses.name.lower()}": cl for cl in Classes.objects.select_related('courses').all()}
                     students = {f"{s.username.strip().lower()} {s.last_name.strip().lower()}": s for s in Student.objects.all()}
                     teachers = {f"{t.username.strip().lower()} {t.last_name.strip().lower()}": t for t in Teacher.objects.all()}
-
+                    print(departments, courses, classes, students, teachers)
                     for index, row in data.iterrows():
                         record_to_date = parse_date(row.get('To Date'))
                         record_from_date = parse_date(row.get('From Date'))
@@ -891,7 +874,6 @@ def upload_and_filter_attendance(request):
                         if not class_room:
                             continue
 
-                        # Save the record in the database
                         record = Attendance.objects.create(
                             to_date=record_to_date,
                             from_date=record_from_date,
@@ -920,7 +902,6 @@ def upload_and_filter_attendance(request):
                     'message': 'Invalid file type. Please upload an Excel or CSV file.'
                 })
 
-    # Fetch records from the database to persist them on page refresh
     if from_date and to_date:
         uploaded_records = Attendance.objects.filter(from_date__gte=from_date, to_date__lte=to_date)
     else:
@@ -933,27 +914,20 @@ def upload_and_filter_attendance(request):
     })
 @login_required
 def view_attendance(request):
-    # Get date range and filter parameters from the request
-    from_date_str = request.GET.get('from_date')  # Start of the date range
-    to_date_str = request.GET.get('to_date')      # End of the date range
-    class_id = request.GET.get('class')           # Class filter
-    attendance_status = request.GET.get('status') # Attendance status filter
-
-    # Parse date filters
+    from_date_str = request.GET.get('from_date')  
+    to_date_str = request.GET.get('to_date')      
+    class_id = request.GET.get('class')           
+    attendance_status = request.GET.get('status')
     from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date() if from_date_str else None
     to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date() if to_date_str else None
 
-    # Get the teacher linked to the logged-in user (adjust this to your user-teacher relationship)
     teacher = Teacher.objects.get(username=request.user.username)
 
-    # Get the courses taught by the teacher and the related classes
     teacher_courses = teacher.courses.all()
     teacher_classes = Classes.objects.filter(courses__in=teacher_courses)
 
-    # Get attendance records for students in the teacher's classes
     attendance_records = Attendance.objects.filter(class_room__in=teacher_classes)
 
-    # Apply filters based on the date range, class, and status
     if from_date:
         attendance_records = attendance_records.filter(date__gte=from_date)
     if to_date:
@@ -963,17 +937,16 @@ def view_attendance(request):
     if attendance_status:
         attendance_records = attendance_records.filter(status=attendance_status)
 
-    # Get today's date for comparison (used for any other logic)
     today = now().date()
 
     return render(request, 'teacher/teacher_module/view_attendance.html', {
-        'attendance_records': attendance_records,  # Pass filtered records
+        'attendance_records': attendance_records,  
         'from_date': from_date_str,
         'to_date': to_date_str,
         'today': today,
-        'classes': teacher_classes,  # Pass teacher's classes for dropdown
-        'selected_class': class_id,  # Keep the selected class in dropdown
-        'attendance_status': attendance_status  # Keep selected status
+        'classes': teacher_classes, 
+        'selected_class': class_id,  
+        'attendance_status': attendance_status  
     })
 
 from django.contrib.auth.decorators import login_required
@@ -982,11 +955,8 @@ from .models import Teacher
 
 @login_required(login_url='home')
 def view_profile(request):  
-    # Get the teacher profile associated with the logged-in user
     custom_user = request.user
-    teacher = custom_user.teacher  # Use the teacher field in CustomUser
-    
-    # Fetch the teacher and prefetch related courses
+    teacher = custom_user.teacher  
     teacher = Teacher.objects.prefetch_related('courses').get(id=teacher.id)
     
     return render(request, 'teacher/teacher_module/profile.html', {'teacher': teacher})
