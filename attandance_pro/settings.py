@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'attandance.apps.AttendanceConfig',  # Correctly reference the AppConfig class
+    'attandance',  # Correctly reference the AppConfig class
     'authenticate',
 ]
    
@@ -121,18 +121,18 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Celery settings
 
-# The address of the Redis server
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+# # The address of the Redis server
+# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 
-# Where Celery will store task results (using Redis as the backend)
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+# # Where Celery will store task results (using Redis as the backend)
+# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
 
-# Additional Celery settings
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# # Additional Celery settings
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
+# # CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 

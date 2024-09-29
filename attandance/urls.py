@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from attandance import views
 urlpatterns = [
-    path('index/', views.index, name='index'),  
+    # path('index/', views.index, name='index'),  
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),

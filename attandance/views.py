@@ -17,9 +17,9 @@ import pandas as pd
 from django.utils.timezone import now
 from datetime import datetime
 
-def index(request):
-    send_mail_task.delay() 
-    return HttpResponse("<h1>Home,from celery</h1>")
+# def index(request):
+#     send_mail_task.delay() 
+#     return HttpResponse("<h1>Home,from celery</h1>")
 
 
 def home(request):
@@ -912,6 +912,8 @@ def upload_and_filter_attendance(request):
         'from_date': from_date,
         'to_date': to_date
     })
+
+
 @login_required
 def view_attendance(request):
     from_date_str = request.GET.get('from_date')  
