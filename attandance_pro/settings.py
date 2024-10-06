@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+from celery.schedules import crontab
 
 from pathlib import Path
 import os
@@ -33,8 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'attandance',  # Correctly reference the AppConfig class
+    'attandance', 
     'authenticate',
+    'django_celery_beat',
 ]
    
 MIDDLEWARE = [
@@ -103,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Karachi'
 
 USE_I18N = True
 
@@ -121,20 +123,34 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Celery settings
 
-# # The address of the Redis server
-# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+# The address of the Redis server
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 
-# # Where Celery will store task results (using Redis as the backend)
-# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+# Where Celery will store task results (using Redis as the backend)
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
 
-# # Additional Celery settings
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'UTC'
-# # CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# Additional Celery settings
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Karachi'
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# settings.py
 
+# CELERY settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Use Redis as the message broker
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Optional, to store task results
+CELERY_BEAT_SCHEDULE = {
+    
+    'upload_attendance_every_day_at_8_pm': {  
+        'task': 'attandance.tasks.upload_task', 
+        'schedule': crontab(hour=20, minute=0),  
+    },
+}
 
+CELERY_WORKER_POOL = 'solo'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -143,3 +159,5 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'shaistatabbasum523@gmail.com'  
 EMAIL_HOST_PASSWORD = 'mrlx nkgo dgpo lzny' 
 EMAIL_USE_TLS = True
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

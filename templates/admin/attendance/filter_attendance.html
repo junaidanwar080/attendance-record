@@ -84,16 +84,7 @@
 <body>
     {% include 'navbar.html' %}
     <div class="container mt-5">
-        <h2>Upload Attendance File</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="attendance_file">Upload Excel or CSV File:</label>
-                <input type="file" class="form-control" id="attendance_file" name="attendance_file" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-
+       
         {% if message %}
         <div class="alert alert-info mt-3">{{ message }}</div>
         {% endif %}
@@ -151,6 +142,11 @@
 
         <script>
             $(document).ready(function () {
+                // Remove or comment out the following lines if you don't want the page to reload
+                setTimeout(function () {
+                    location.reload();
+                }, 60000);// Check every minute (60000 milliseconds) if it's 8:00 PM
+
                 var table = $('#attendanceList').DataTable({
                     ordering: false,  // Disable sorting/ordering
                     initComplete: function () {
@@ -221,6 +217,7 @@
 
 
         </script>
+
 </body>
 
 </html>
