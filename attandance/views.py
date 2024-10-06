@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.http import JsonResponse
 from .models import *
 from django.views.decorators.csrf import csrf_exempt
-from .task import *
+from .tasks import *
 from .helper import *
 from datetime import datetime
 x = datetime.now()  
@@ -780,138 +780,65 @@ def parse_date(date_str):
         return pd.to_datetime(date_str, format='%d-%m-%Y').date()  
     except ValueError:
         return None
+# myapp/views.py
+from django.shortcuts import render
+from django.utils.dateparse import parse_date
+# from .tasks import process_attendance_file
+# from .google_drive import upload_file_to_google_drive  # Import the Google Drive function
+# from .models import Attendance, Department, Courses, Classes, Student, Teacher
+from .google_drive import *
+# attendance/views.py
+from django.shortcuts import render
+# from .tasks import process_attendance_file
+import os
+# from .models import Attendance
+from django.conf import settings
+
+def parse_date(date_str):
+    try:
+        return pd.to_datetime(date_str, format='%d-%m-%Y').date()
+    except ValueError:
+        return None
+# attendance/views.py
 
 def upload_and_filter_attendance(request):
-    uploaded_records = []
-    from_date = None
-    to_date = None
-
     if request.method == 'POST':
+        uploaded_file = request.FILES.get('file')
         from_date_str = request.POST.get('from_date')
         to_date_str = request.POST.get('to_date')
 
-        from_date = parse_date(from_date_str) if from_date_str else None
-        to_date = parse_date(to_date_str) if to_date_str else None
-
-        uploaded_file = request.FILES.get('attendance_file')
         if uploaded_file:
-            file_extension = uploaded_file.name.split('.')[-1]
-            if file_extension in ['xls', 'xlsx', 'csv']:
-                try:
-                    if file_extension == 'csv':
-                        data = pd.read_csv(uploaded_file)
-                    else:
-                        data = pd.read_excel(uploaded_file)
+            # Create the directory for attendance records if it doesn't exist
+            attendance_dir = os.path.join(settings.MEDIA_ROOT, 'attendance_records')
+            os.makedirs(attendance_dir, exist_ok=True)
 
-                    data.columns = data.columns.str.strip()
-                    data.rename(columns={
-                        'course': 'Course',
-                        'Departme': 'Department',
-                        'Class room:': 'Class',
-                        'Status:': 'Status',
-                        'to_date': 'To Date',
-                        'from_date': 'From Date',
-                        'username': 'First Name',
-                        'last_name': 'Last Name',
-                        'teacher_username': 'Teacher First Name', 
-                        'teacher_last_name': 'Teacher Last Name'
-                    }, inplace=True)
-                    
-                    required_columns = ['Course', 'Department', 'To Date', 'From Date', 'Class', 'Status', 'First Name', 'Last Name', 'Teacher First Name', 'Teacher Last Name']
-                    if any(col not in data.columns for col in required_columns):
-                        return render(request, 'admin/attendance/filter_attendance.html', {
-                            'message': 'The file does not contain required columns. Columns found: ' + ', '.join(data.columns)
-                        })
+            # Save the uploaded file temporarily and get the file path
+            file_path = os.path.join(attendance_dir, uploaded_file.name)
+            with open(file_path, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
 
-                    departments = {d.name.lower(): d for d in Department.objects.all()}
-                    courses = {f"{c.name.lower()}-{c.department.name.lower()}": c for c in Courses.objects.select_related('department').all()}
-                    classes = {f"{cl.name.lower()}-{cl.courses.name.lower()}": cl for cl in Classes.objects.select_related('courses').all()}
-                    students = {f"{s.username.strip().lower()} {s.last_name.strip().lower()}": s for s in Student.objects.all()}
-                    teachers = {f"{t.username.strip().lower()} {t.last_name.strip().lower()}": t for t in Teacher.objects.all()}
-                    print(departments, courses, classes, students, teachers)
-                    for index, row in data.iterrows():
-                        record_to_date = parse_date(row.get('To Date'))
-                        record_from_date = parse_date(row.get('From Date'))
+            # Call the upload_task with the required parameters
+            # Note: We don't wait for Celery to finish, just queue the task
+            upload_task.delay(file_path, from_date_str, to_date_str)
 
-                        if record_to_date and record_from_date:
-                            if from_date and record_to_date < from_date:
-                                continue
-                            if to_date and record_from_date > to_date:
-                                continue
+            # Return success message as a JSON response
+            return JsonResponse({
+                'message': 'File uploaded successfully. Processing in background. The page will reload shortly.',
+                'success': True
+            })
 
-                        username = row.get('First Name', '').strip().lower()
-                        last_name = row.get('Last Name', '').strip().lower()
-                        if not username or not last_name:
-                            continue
-
-                        student_key = f"{username} {last_name}"
-                        student = students.get(student_key)
-                        if not student:
-                            continue
-
-                        teacher_first_name = row.get('Teacher First Name', '').strip().lower()
-                        teacher_last_name = row.get('Teacher Last Name', '').strip().lower()
-                        if not teacher_first_name or not teacher_last_name:
-                            continue
-
-                        teacher_key = f"{teacher_first_name} {teacher_last_name}"
-                        teacher = teachers.get(teacher_key)
-                        if not teacher:
-                            continue
-
-                        department_name = row.get('Department', '').strip().lower()
-                        department = departments.get(department_name)
-                        if not department:
-                            continue
-
-                        course_key = f"{row.get('Course', '').strip().lower()}-{department_name}"
-                        course = courses.get(course_key)
-                        if not course:
-                            continue
-
-                        class_key = f"{row.get('Class', '').strip().lower()}-{row.get('Course', '').strip().lower()}"
-                        class_room = classes.get(class_key)
-                        if not class_room:
-                            continue
-
-                        record = Attendance.objects.create(
-                            to_date=record_to_date,
-                            from_date=record_from_date,
-                            department=department,
-                            course=course,
-                            student=student,
-                            teacher=teacher,
-                            class_room=class_room,
-                            status=row['Status']
-                        )
-                        uploaded_records.append(record)
-
-                    return render(request, 'admin/attendance/filter_attendance.html', {
-                        'attendance_records': uploaded_records,
-                        'message': 'File uploaded and data displayed successfully.',
-                        'from_date': from_date_str,
-                        'to_date': to_date_str
-                    })
-
-                except Exception as e:
-                    return render(request, 'admin/attendance/filter_attendance.html', {
-                        'message': f'Error processing file: {str(e)}'
-                    })
-            else:
-                return render(request, 'admin/attendance/filter_attendance.html', {
-                    'message': 'Invalid file type. Please upload an Excel or CSV file.'
-                })
-
-    if from_date and to_date:
-        uploaded_records = Attendance.objects.filter(from_date__gte=from_date, to_date__lte=to_date)
-    else:
-        uploaded_records = Attendance.objects.all()
+    # If not a POST request, just retrieve attendance records
+    attendance_records = Attendance.objects.all().order_by('-to_date')
 
     return render(request, 'admin/attendance/filter_attendance.html', {
-        'attendance_records': uploaded_records,
-        'from_date': from_date,
-        'to_date': to_date
+        'attendance_records': attendance_records
     })
+
+
+
+
+
 
 
 @login_required

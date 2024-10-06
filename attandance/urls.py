@@ -44,5 +44,6 @@ urlpatterns = [
      path('view_profile/', views.view_profile, name='view_profile'),
     path('view_courses/', views.view_courses, name='view_courses'),
     path('view_attendance/', views.view_attendance, name='view_attendance'), 
+    # path('check-task-status/', views.check_task_status, name='check-task-status'),
 ]  
 
