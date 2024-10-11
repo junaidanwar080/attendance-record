@@ -16,56 +16,22 @@ from django.utils import timezone
 import pandas as pd
 from django.utils.timezone import now
 from datetime import datetime
-
-# def index(request):
-#     send_mail_task.delay() 
-#     return HttpResponse("<h1>Home,from celery</h1>")
-
+from django.utils.dateparse import parse_date
+import os
 
 def home(request):
     return render(request,'before_login/home.html')
 # -----------------------------------------------------------------------------------------------------
-# Dashboard ,  admin
+# Dashboard 
 # -----------------------------------------------------------------------------------------------------
-
-
 @login_required(login_url='home')
 def dashboard(request):   
     return render(request, 'dashboard.html')
 def teacher_dashboard(request):   
     return render(request, 'teacher/teacher_dashboard.html')
-
-# def teacher_dashboard(request):
-#     if request.user.is_authenticated:
-#         try:
-#             student = Student.objects.get(student_id=request.user)
-#         except Student.DoesNotExist:
-#             student = None
-
-#         if student:
-#             department = student.department
-#             courses = student.courses.all()
-#             classes = Classes.objects.filter(courses__in=courses)
-#             context = {
-#                 'student': student,
-#                 'department': department,
-#                 'courses': courses,
-#                 'classes': classes,
-#             }
-#         else:
-#             context = {'message': 'No student profile found.'}
-        
-#         return render(request, 'student/student_dashboard.html', context)
-#     else:
-#         return redirect('login')
-
-
-
 # -----------------------------------------------------------------------------------------------------
 # Student Account
 # -----------------------------------------------------------------------------------------------------
-
-
 @login_required(login_url='home')
 def add_student(request):
     if request.method == "POST":
@@ -277,7 +243,6 @@ def add_teacher(request):
 
         return redirect('teacher_list')
 
-    # Handle GET request
     last_teacher = Teacher.objects.order_by('-created_on').first()
     teacher_id = 1 if last_teacher is None else int(last_teacher.teacher_id) + 1
 
@@ -466,8 +431,9 @@ def designation_delete(request,pk):
     designation.delete()
     return redirect(designation_list)
 
-
-#==============================Department==========================
+# -----------------------------------------------------------------------------------------------------
+# Department
+# -----------------------------------------------------------------------------------------------------
 
 @login_required(login_url='home')
 def department_add(request):
@@ -572,8 +538,9 @@ def department_delete(request,pk):
     return redirect(department_list)
 
 
-
-#==============================Courses==========================
+# -----------------------------------------------------------------------------------------------------
+# Courses
+# -----------------------------------------------------------------------------------------------------
 
 @login_required(login_url='home')
 def courses_add(request):
@@ -668,15 +635,16 @@ def courses_update(request, courses_id):
         course.save()
         return redirect('courses_list')
 
-    # For GET request
+    # For GET request 
     departments = Department.objects.all()
     return render(request, 'admin/courses/courses_update.html', {
         'course': course,
         'departments': departments
     })
 
-
-#==============================class==========================
+# -----------------------------------------------------------------------------------------------------
+# Calsses 
+# -----------------------------------------------------------------------------------------------------
 
 @login_required(login_url='home')
 def classes_add(request):
@@ -686,11 +654,9 @@ def classes_add(request):
             classes_id = 1
         else:
             classes_id = int(last_classes.classes_id) + 1
-
         error_messages = {}
         name = request.POST.get('name')
         course_id = request.POST.get('course')
-
         if not name:
             error_messages['name'] = "Name is required."
         
@@ -707,6 +673,7 @@ def classes_add(request):
             }) 
   
         selected_course = Courses.objects.get(pk=course_id)  
+        print(selected_course)
         classes_add = Classes(
             classes_id=classes_id,
             name=name,
@@ -721,13 +688,11 @@ def classes_add(request):
         classes_id = 1
     else:
         classes_id = int(last_classes.classes_id) + 1
-
     courses = Courses.objects.all() 
     return render(request, 'admin/class/classes_add.html', {
         "classes_id": classes_id,
         'courses': courses  
     })
-
 @login_required(login_url='home')
 def classes_list(request):  
     classes = Classes.objects.all()
@@ -740,18 +705,14 @@ def classes_list(request):
 @login_required(login_url='home')
 def classes_update(request, class_id):
     classes = get_object_or_404(Classes, pk=class_id)
-
     if request.method == "POST":
         error_messages = {}
         name = request.POST.get('name')
         course_id = request.POST.get('course')
-
         if not name:
             error_messages['name'] = "Name is required."
-
         if not course_id:
             error_messages['course'] = "Course selection is required."
-
         if error_messages:
             courses = Courses.objects.all()
             return render(request, 'admin/class/classes_update.html', {
@@ -760,7 +721,6 @@ def classes_update(request, class_id):
                 'classes': classes,
                 'courses': courses,
             })
-       
         classes.name = name
         classes.courses_id = course_id
         classes.updated_on = timezone.now().date()
@@ -780,22 +740,12 @@ def parse_date(date_str):
         return pd.to_datetime(date_str, format='%d-%m-%Y').date()  
     except ValueError:
         return None
-# myapp/views.py
-from django.shortcuts import render
-from django.utils.dateparse import parse_date
-from django.shortcuts import render
-# from .tasks import process_attendance_file
-import os
-# from .models import Attendance
-from django.conf import settings
 
 def parse_date(date_str):
     try:
         return pd.to_datetime(date_str, format='%d-%m-%Y').date()
     except ValueError:
         return None
-# attendance/views.py
-
 def upload_attendance(request):
     if request.method == 'POST':
         uploaded_file = request.FILES.get('file')
